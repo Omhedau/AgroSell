@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 // Define the type for the user object in the store
 const Home: React.FC = () => {
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView className="flex-1 bg-primary-100">
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
@@ -20,7 +20,7 @@ const Home: React.FC = () => {
           alignItems: "center",
         }}
         showsVerticalScrollIndicator={false}
-        className="bg-primary-100 mb-24"
+        className="bg-primary-100 mb-20"
       >
         <Text className="text-green-400">Om Hedau is Your Boss</Text>
       </ScrollView>

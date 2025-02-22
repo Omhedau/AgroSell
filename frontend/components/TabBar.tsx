@@ -93,13 +93,14 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
 
 const styles = StyleSheet.create({
   tabbar: {
-    position: "absolute",
+    // position: "absolute",
     bottom: 2,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "white",  //"#E8F8E8",
     // marginHorizontal: 5, // Adjusted margin for a smaller width
+    marginTop: 4, // Adjusted margin for a smaller height
     paddingVertical: 10, // Reduced padding for a smaller height
     paddingHorizontal: 8,
     borderTopLeftRadius: 20, // Rounded only the top-left corner

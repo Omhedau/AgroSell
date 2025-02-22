@@ -35,7 +35,7 @@ const Page = () => {
   if (isSignedIn === null) {
     // Show a loader while checking the token
     return (
-      <View className="flex-1 justify-center items-center bg-gray-100">
+      <View className="flex-1 justify-center items-center bg-primary-100">
         <ActivityIndicator size="large" color="#4F46E5" />
       </View>
     );
