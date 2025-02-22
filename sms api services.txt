@@ -1,0 +1,12 @@
+sms api services : 
+	
+fast2sms  rs.50 free
+msg91
+textlocal
+plivo ***
+
+
+
+**************************
+
+for order schema -> check variable status from owner side as well as user side(request, scheduled, completed) 

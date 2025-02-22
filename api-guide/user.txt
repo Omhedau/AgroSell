@@ -1,0 +1,28 @@
+routes : 
+get : /api/user/                getUsers
+get : /api/user/:id             getUser
+post : /api/user/               createUser
+put : /api/user/:id             updateUser
+delete : /api/user/:id          deleteUser
+post : /api/user/login          loginUser
+
+
+get : /api/user/:id             getUser
+    res :  {
+    "message": "User found",
+    "user": {
+        "_id": "67821571ec64f3d1ae6dcdbc",
+        "name": "Navnath Jambale",
+        "mobile": "9876543210",
+        "password": "123456",
+        "lang": "Marathi",
+        "gender": "Male",
+        "role": "Farmer",
+        "profile": "https://example.com/profiles/navnath.jpg",
+        "isVerified": false,
+        "createdAt": "2025-01-11T06:53:37.022Z",
+        "updatedAt": "2025-01-11T06:53:37.022Z",
+        "__v": 0
+    }
+    }
+
