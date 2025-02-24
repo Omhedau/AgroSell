@@ -47,7 +47,7 @@ const Seller = () => {
   }
 
   console.log("Redirecting seller to sign-in");
-  return <Redirect href="/(auth)/sign-in" />;
+  return <Redirect href="/(auth)/sign-up" />;
 };
 
 export default Seller;
