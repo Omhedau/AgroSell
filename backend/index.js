@@ -21,6 +21,7 @@ app.use(cors());
 // Route for handling user-related API requests
 
 app.use("/api/user", require("./routes/user"));
+app.use("/api/seller", require("./routes/seller"));
 app.use(errorHandler);
 // Start the server and listen on the specified port
 app.listen(port, () => {

@@ -11,22 +11,36 @@ import {
 } from "react-native";
 import images from "@/constants/images";
 import { router, useLocalSearchParams } from "expo-router";
-import useUserStore from "@/store/userStore";
+import useSellerStore from "@/store/useSellerStore";
 
 const OtpVerification = () => {
   const { mobile } = useLocalSearchParams() as { mobile: string };
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [resendTimer, setResendTimer] = useState(57);
   const inputRefs = useRef<(TextInput | null)[]>([]);
-  const { verifyOtp } = useUserStore() as { verifyOtp: (mobile: string, otp: string) => void }; 
+  const { verifyOtp, resendOtp } = useSellerStore() as unknown as {
+    verifyOtp: (mobile: string, otp: string) => void;
+    resendOtp: (mobile: string) => void;
+  };
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [resendTimer]);
 
   const handleInputChange = (text: string, index: number) => {
-    const newOtp = [...otp];
-    newOtp[index] = text;
-    setOtp(newOtp);
+    if (/^\d*$/.test(text)) {
+      const newOtp = [...otp];
+      newOtp[index] = text;
+      setOtp(newOtp);
 
-    if (text && index < otp.length - 1) {
-      inputRefs.current[index + 1]?.focus();
+      if (text && index < otp.length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      }
     }
   };
 
@@ -40,23 +54,15 @@ const OtpVerification = () => {
   };
 
   const handleVerifyOtp = () => {
-    // Logic to verify OTP
-    verifyOtp(mobile, otp.join(""));  
+    verifyOtp(mobile, otp.join(""));
   };
 
   const handleResendOtp = () => {
     setResendTimer(60);
-    // Logic to resend OTP
+    setOtp(["", "", "", ""]);
+    resendOtp(mobile);
+    inputRefs.current[0]?.focus();
   };
-
-  useEffect(() => {
-    if (resendTimer > 0) {
-      const timer = setInterval(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [resendTimer]);
 
   return (
     <KeyboardAvoidingView
@@ -75,7 +81,8 @@ const OtpVerification = () => {
               Verify OTP
             </Text>
             <Text className="text-sm text-gray-600 text-center mt-2">
-              OTP has been sent to contact number ending with +91 ******9682
+              OTP has been sent to contact number ending with +91{" "}
+              <Text className="font-semibold">{mobile.slice(-4)}</Text>
             </Text>
             <Text className="text-primary-500 mt-2 font-medium">
               Change Number

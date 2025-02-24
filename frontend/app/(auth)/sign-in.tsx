@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useLanguage } from "@/context/LanguageContext";
 import images from "@/constants/images";
-import useUserStore from "@/store/userStore";
+import useSellerStore from "@/store/useSellerStore"; // Updated store import
 
 interface Translations {
   en: {
@@ -35,21 +35,21 @@ interface Translations {
 export default function SignIn(): JSX.Element {
   const { language } = useLanguage(); // Get the current language from context
   const [mobile, setMobile] = useState<string>(""); // State for mobile number
-  const { signIn } = useUserStore() as { signIn: (mobile: string) => void };
+  const { signIn } = useSellerStore() as { signIn: (mobile: string) => void }; // Updated store
 
   const translations: Translations = {
     en: {
-      welcome: "Welcome to Farmease!",
+      welcome: "Welcome to Farmease Seller!",
       mobilePlaceholder: "Enter your mobile number",
       continue: "CONTINUE",
     },
     hi: {
-      welcome: "फार्मईज में आपका स्वागत है!",
+      welcome: "फार्मईज विक्रेता में आपका स्वागत है!",
       mobilePlaceholder: "अपना मोबाइल नंबर दर्ज करें",
       continue: "जारी रखें",
     },
     mr: {
-      welcome: "फार्मईजमध्ये आपले स्वागत आहे!",
+      welcome: "फार्मईज विक्रेता मध्ये आपले स्वागत आहे!",
       mobilePlaceholder: "तुमचा मोबाईल नंबर प्रविष्ट करा",
       continue: "सुरू ठेवा",
     },
@@ -74,8 +74,7 @@ export default function SignIn(): JSX.Element {
       return;
     }
 
-    signIn(mobile);
-   
+    signIn(mobile); // Call the updated seller sign-in function
   };
 
   return (
