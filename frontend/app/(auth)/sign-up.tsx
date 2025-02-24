@@ -7,11 +7,11 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import images from "@/constants/images";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import useUserStore from "@/store/useSellerStore";
+  import images from "@/constants/images";
+  import { useLocalSearchParams, useRouter } from "expo-router";
+  import useUserStore from "@/store/useSellerStore";
 
-const SignUp = () => {
+  const SignUp = () => {
   const { mobile } = useLocalSearchParams();
   const mobileNumber = Array.isArray(mobile) ? mobile[0] : mobile;
   const [formData, setFormData] = useState({
@@ -30,7 +30,7 @@ const SignUp = () => {
 
     signUp(userDetails);
 
-  };
+};
 
   return (
     <ScrollView

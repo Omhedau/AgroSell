@@ -43,53 +43,57 @@ const getSeller = asyncHandler(async (req, res) => {
 // @desc Create a New Seller
 // @route POST /api/seller
 // @access Public
-const createSeller = asyncHandler(async (req, res) => {
-  const { username, email, phoneNumber, password, gender } = req.body;
+// Import Seller model
 
-  // Check if phone number is verified
-  const isVerified = await Otp.findOne({
-    mobile: phoneNumber,
-    isVerified: true,
-  });
-  
-  if (!isVerified) {
+
+const createSeller = asyncHandler(async (req, res) => {
+  let { name, mobile, gender, lang } = req.body;
+
+  // Validate required fields
+  if (!name || !mobile || !gender) {
     res.status(400);
-    throw new Error("Phone number not verified");
+    throw new Error("Please provide all required fields: name, mobile, and gender.");
   }
 
-  // Check if seller already exists
-  const existingSeller = await Seller.findOne({
-    $or: [{ email }, { phoneNumber }],
-  });
+  // Set default language if not provided
+  lang = lang || "en";
+
+  // Check if the seller already exists (based on mobile number)
+  const existingSeller = await Seller.findOne({ mobile });
   if (existingSeller) {
     res.status(400);
-    throw new Error("Seller already exists with this email or phone number");
+    throw new Error("Seller with this mobile number already exists.");
   }
 
-  // Hash Password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  // Create Seller
+  // Create new seller
   const seller = await Seller.create({
-    username,
-    email,
-    phoneNumber,
-    password: hashedPassword,
+    name,
+    mobile,
     gender,
-    storeDetails: {},
-    storeAddress: {},
-    bankDetails: {},
+    lang,
   });
 
   if (seller) {
-    const token = generateToken(seller);
-    res.status(201).json({ seller, token });
+    res.status(201).json({
+      _id: seller._id,
+      name: seller.name,
+      mobile: seller.mobile,
+      gender: seller.gender,
+      lang: seller.lang, // Ensures "en" if not provided
+      createdAt: seller.createdAt,
+    });
   } else {
     res.status(400);
     throw new Error("Invalid seller data");
   }
 });
+
+
+
+
+
+
+
 
 // @desc Update Seller Profile
 // @route PUT /api/seller/:id
