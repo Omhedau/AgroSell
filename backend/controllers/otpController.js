@@ -1,118 +1,112 @@
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const Seller = require("../models/seller"); // Updated: Seller model instead of User
 const Otp = require("../models/otp");
-const {sendSms} = require("../services/smsService");
+const { sendSms } = require("../services/smsService");
 
-
-const generateToken = (user) => {
+// Function to generate JWT token
+const generateToken = (seller) => {
   return jwt.sign(
-    { id: user._id, name: user.name, mobile: user.mobile },
+    { id: seller._id, name: seller.name, mobile: seller.mobile },
     process.env.JWT_SECRET,
     { expiresIn: "30d" }
   );
 };
 
-//@desc POST /api/user/otp
-//@access Public
+// @desc   Send OTP to seller's mobile number
+// @route  POST /api/seller/otp
+// @access Public
 const sendOtp = asyncHandler(async (req, res) => {
-  console.log('i am in sendOtp');
+  console.log("i am in sendOtp");
   const { mobile } = req.body;
-  console.log("Mobile : " , mobile);
-  
+  console.log("Mobile: ", mobile);
+
   // Generate 4-digit OTP
   const otp = Math.floor(1000 + Math.random() * 9000);
-  
+
+  // Check if OTP already exists for the mobile number
   const existingOtp = await Otp.findOne({ mobile });
   if (existingOtp) {
-    // Update the existing OTP
     existingOtp.otp = otp;
     await existingOtp.save();
   } else {
-    // Create a new OTP document
     await Otp.create({ mobile, otp });
   }
 
-  console.log("OTP : " , otp);
-  // Send OTP to user's mobile number
+  console.log("OTP: ", otp);
   await sendSms(mobile, otp);
-  res.status(200).json({
-    message: "OTP sent successfully"
-  });
+
+  res.status(200).json({ message: "OTP sent successfully" });
 });
 
-//DESC POST /api/user/verify
-//ACCESS Public
-const verifyOtp = async (req, res) => {
+// @desc   Verify OTP
+// @route  POST /api/seller/verify
+// @access Public
+const verifyOtp = asyncHandler(async (req, res) => {
   try {
-    console.log('i am in verifyOtp');
+    console.log("i am in verifyOtp");
     const { mobile, otp } = req.body;
-    console.log("Mobile : " , mobile);
-    console.log("OTP : " , otp);
+    console.log("Mobile: ", mobile);
+    console.log("OTP: ", otp);
 
-        // Find OTP for the provided mobile number
+    // Find OTP for the provided mobile number
     const existingOtp = await Otp.findOne({ mobile });
     if (!existingOtp) {
-      return res.status(404).json({ error: "OTP not found. Please request a new OTP." });
+      return res
+        .status(404)
+        .json({ error: "OTP not found. Please request a new OTP." });
     }
 
-    // Check if the provided OTP matches
+    // Validate OTP
     if (existingOtp.otp !== otp) {
       return res.status(400).json({ error: "Invalid OTP." });
     }
-   
-    // Find the user associated with the mobile number
-    const user = await User.findOne({ mobile });
 
-    // If OTP is correct and user is found
-    if (user) {
-      const token = generateToken(user);
-      return res.status(200).json({user,token});
+    // Find the seller associated with the mobile number
+    const seller = await Seller.findOne({ mobile });
+
+    if (seller) {
+      const token = generateToken(seller);
+      return res.status(200).json({ seller, token });
     }
 
     await Otp.findOneAndUpdate({ mobile }, { isVerified: true });
 
-    // If OTP is correct but user is not found
     return res.status(200).json({
-      message: "OTP verified successfully. User not found.",
-      user: null, // Explicitly set user as null
+      message: "OTP verified successfully. Seller not found.",
+      seller: null,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error." });
   }
-};
+});
 
-
-//desc POST /api/user/resendOtp
-//ACCESS Public
+// @desc   Resend OTP
+// @route  POST /api/seller/resendOtp
+// @access Public
 const resendOtp = asyncHandler(async (req, res) => {
   const { mobile } = req.body;
-  console.log("Mobile : " , mobile);
+  console.log("Mobile: ", mobile);
+
   const existingOtp = await Otp.findOne({ mobile });
+
   if (!existingOtp) {
-    // Generate 4-digit OTP
+    // Generate new OTP
     const otp = Math.floor(1000 + Math.random() * 9000);
-    console.log("OTP : " , otp);  
-    // Create a new OTP document
+    console.log("New OTP: ", otp);
+
     await Otp.create({ mobile, otp });
 
-    console.log("OTP : " , otp);
-    // Send OTP to user's mobile number
     await sendSms(mobile, otp);
-    res.status(200).json({
-      message: "OTP sent successfully"
-    });
+    return res.status(200).json({ message: "OTP sent successfully" });
   }
 
-  console.log("OTP - here : " , existingOtp.otp);
-  const otp = existingOtp.otp;
-  // Send the existing OTP again
-  await sendSms(mobile, otp);
-  res.status(200).json({
-    message: "OTP sent successfully"
-  });
+  console.log("Existing OTP: ", existingOtp.otp);
+  await sendSms(mobile, existingOtp.otp);
+
+  res.status(200).json({ message: "OTP sent successfully" });
 });
 
 module.exports = { sendOtp, verifyOtp, resendOtp };
