@@ -2,13 +2,13 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import useUserStore from "@/store/userStore";
+import useSellerStore from "../store/useSellerStore"; // ✅ Corrected Import
 
 const TopBar = () => {
   const router = useRouter();
   
-  const { user, isDarkMode, toggleDarkMode } = useUserStore() as {
-      user: { name: string, [key: string]: any };
+  const { seller, isDarkMode, toggleDarkMode } = useSellerStore() as {
+      seller: { name: string, [key: string]: any };
       isDarkMode: boolean;
       toggleDarkMode: () => void;
   };
@@ -20,7 +20,7 @@ const TopBar = () => {
       .join("");
   };
 
-  if (!user) return null;
+  if (!seller) return null; // ✅ Changed from `user` to `seller`
 
   return (
     <View className="flex-row justify-between items-center px-4 py-3 bg-primary-100">
@@ -37,11 +37,11 @@ const TopBar = () => {
 
         {/* Profile Button */}
         <TouchableOpacity
-          onPress={() => router.push("/(root)/profile")}
+          onPress={() => router.push("/(root)/profile")} // ✅ Updated path
           className="w-9 h-9 bg-indigo-200 rounded-full justify-center items-center shadow-md ml-4"
         >
           <Text className="text-indigo-800 font-semibold text-sm">
-            {getInitials(user.name)}
+            {getInitials(seller.name)}
           </Text>
         </TouchableOpacity>
       </View>

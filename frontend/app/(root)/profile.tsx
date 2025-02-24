@@ -1,17 +1,20 @@
 import React from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import useUserStore from "@/store/userStore";
+import useSellerStore from "@/store/useSellerStore"; // ✅ Corrected store import
 
 const Profile = () => {
-  const { user, logout } = useUserStore() as { user: { name: string; mobile: string; gender: string; role: string; lang: string }, logout: () => void };
+  const { seller, logout } = useSellerStore();
+
+  if (!seller) {
+    return <Text>Loading...</Text>;
+  }
 
   const getInitials = (name: string) => {
-    const initials = name
+    return name
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase())
       .join("");
-    return initials;
   };
 
   return (
@@ -22,30 +25,30 @@ const Profile = () => {
           {/* Profile Photo */}
           <View className="w-28 h-28 bg-indigo-300 rounded-full justify-center items-center mb-4">
             <Text className="text-4xl text-white font-bold">
-              {getInitials(user.name)}
+              {getInitials(seller.name)}
             </Text>
           </View>
-          <Text className="text-2xl font-bold text-white">{user.name}</Text>
-          <Text className="text-base text-indigo-100">{user.role}</Text>
+          <Text className="text-2xl font-bold text-white">{seller.name}</Text>
+          <Text className="text-base text-indigo-100">{seller.role}</Text>
         </View>
       </View>
 
-      {/* User Info */}
+      {/* Seller Info */}
       <View className="mx-6 mt-6 bg-white rounded-lg shadow-md p-4">
         <Text className="text-lg font-semibold text-gray-800 mb-4">
           Personal Information
         </Text>
         <View className="flex-row items-center mb-3">
           <Ionicons name="call-outline" size={20} color="#6B7280" />
-          <Text className="ml-4 text-base text-gray-700">{user.mobile}</Text>
+          <Text className="ml-4 text-base text-gray-700">{seller.mobile}</Text>
         </View>
         <View className="flex-row items-center mb-3">
           <Ionicons name="language-outline" size={20} color="#6B7280" />
-          <Text className="ml-4 text-base text-gray-700">{user.lang}</Text>
+          <Text className="ml-4 text-base text-gray-700">{seller.lang}</Text>
         </View>
         <View className="flex-row items-center mb-3">
           <Ionicons name="female-outline" size={20} color="#6B7280" />
-          <Text className="ml-4 text-base text-gray-700">{user.gender}</Text>
+          <Text className="ml-4 text-base text-gray-700">{seller.gender}</Text>
         </View>
       </View>
 

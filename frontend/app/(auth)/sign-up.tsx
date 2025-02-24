@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import images from "@/constants/images";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import useUserStore from "@/store/userStore";
+import useUserStore from "@/store/useSellerStore";
 
 const SignUp = () => {
   const { mobile } = useLocalSearchParams();
