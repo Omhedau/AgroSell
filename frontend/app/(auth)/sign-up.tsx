@@ -12,6 +12,7 @@ import { Picker } from "@react-native-picker/picker"; // Import Picker
 import images from "@/constants/images";
 import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as DocumentPicker from "expo-document-picker";
 
 const SignUp = () => {
   const { mobile } = useLocalSearchParams();
@@ -23,17 +24,41 @@ const SignUp = () => {
     email: "",
     gender: "Male",
     lang: "English",
+    storeDetails: {
+      storeName: "",
+      storeLogo: null as string | null,
+      description: "",
+      gstNumber: "",
+      businessLicense: "",
+    },
+    storeAddress: {
+      street: "",
+      district: "", // District will now be selected from a dropdown
+      taluka: "",
+      village: "",
+      pincode: "",
+    },
+    bankDetails: {
+      accountHolderName: "",
+      bankName: "",
+      accountNumber: "",
+      ifscCode: "",
+      upiId: "",
+    },
+  });
+
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    mobile: "",
+    email: "",
     storeName: "",
-    storeDescription: "",
+    description: "",
     gstNumber: "",
     businessLicense: "",
     street: "",
-    district: "", // District will now be selected from a dropdown
-    taluka: "",
-    village: "",
+    district: "",
     pincode: "",
-    latitude: "",
-    longitude: "",
     accountHolderName: "",
     bankName: "",
     accountNumber: "",
@@ -77,12 +102,88 @@ const SignUp = () => {
     "Gadchiroli",
   ];
 
-  const handleSubmit = () => {
-    const fullName = `${formData.firstName} ${formData.lastName}`;
-    const { firstName, lastName, ...rest } = formData;
-    const userDetails = { ...rest, name: fullName };
+  const pickImage = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "image/*",
+      });
 
-    // signUp(userDetails); // Uncomment and implement this function as needed
+      if (result.assets && result.assets.length > 0) {
+        setFormData({
+          ...formData,
+          storeDetails: {
+            ...formData.storeDetails,
+            storeLogo: result.assets[0].uri,
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error picking image: ", error);
+    }
+  };
+
+  const validateForm = () => {
+    let newErrors = {
+      firstName: "",
+      lastName: "",
+      mobile: "",
+      email: "",
+      storeName: "",
+      description: "",
+      gstNumber: "",
+      businessLicense: "",
+      street: "",
+      district: "",
+      pincode: "",
+      accountHolderName: "",
+      bankName: "",
+      accountNumber: "",
+      ifscCode: "",
+      upiId: "",
+    };
+
+    if (!formData.firstName) newErrors.firstName = "First Name is required";
+    if (!formData.lastName) newErrors.lastName = "Last Name is required";
+    if(!formData.mobile) newErrors.mobile = "Mobile is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.storeDetails.storeName)
+      newErrors.storeName = "Store Name is required";
+    if (!formData.storeDetails.description)
+      newErrors.description = "Store Description is required";
+    if (!formData.storeDetails.gstNumber)
+      newErrors.gstNumber = "GST Number is required";
+    if (!formData.storeDetails.businessLicense)
+      newErrors.businessLicense = "Business License is required";
+    if (!formData.storeAddress.street) newErrors.street = "Street is required";
+    if (!formData.storeAddress.district)
+      newErrors.district = "District is required";
+    if (!formData.storeAddress.pincode)
+      newErrors.pincode = "Pincode is required";
+    if (!formData.bankDetails.accountHolderName)
+      newErrors.accountHolderName = "Account Holder Name is required";
+    if (!formData.bankDetails.bankName)
+      newErrors.bankName = "Bank Name is required";
+    if (!formData.bankDetails.accountNumber)
+      newErrors.accountNumber = "Account Number is required";
+    if (!formData.bankDetails.ifscCode)
+      newErrors.ifscCode = "IFSC Code is required";
+    if (!formData.bankDetails.upiId) newErrors.upiId = "UPI ID is required";
+
+    setErrors(newErrors);
+
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      const name = `${formData.firstName} ${formData.lastName}`;
+      const sellerDetails = {
+        name,
+        ...formData,
+      };
+      console.log("Seller Details: ", sellerDetails);
+      // signUp(userDetails); // Uncomment and implement this function as needed
+    }
   };
 
   return (
@@ -113,26 +214,32 @@ const SignUp = () => {
             First Name<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your first name"
             value={formData.firstName}
             onChangeText={(text) =>
               setFormData({ ...formData, firstName: text })
             }
           />
+          {errors.firstName ? (
+            <Text style={styles.errorText}>{errors.firstName}</Text>
+          ) : null}
 
           {/* Last Name Input */}
           <Text className="text-gray-700 font-rubik mb-2">
             Last Name<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your last name"
             value={formData.lastName}
             onChangeText={(text) =>
               setFormData({ ...formData, lastName: text })
             }
           />
+          {errors.lastName ? (
+            <Text style={styles.errorText}>{errors.lastName}</Text>
+          ) : null}
 
           {/* Mobile Input */}
           <Text className="text-gray-700 font-rubik mb-2">
@@ -145,18 +252,24 @@ const SignUp = () => {
             value={formData.mobile}
             editable={false}
           />
+          {errors.mobile ? (
+            <Text style={styles.errorText}>{errors.mobile}</Text>
+          ) : null}
 
           {/* Email Input */}
           <Text className="text-gray-700 font-rubik mb-2">
             Email<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your email"
             keyboardType="email-address"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
           />
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
 
           {/* Gender Selection */}
           <Text className="text-gray-700 font-rubik mb-2">
@@ -225,23 +338,62 @@ const SignUp = () => {
             Store Name<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your store name"
-            value={formData.storeName}
+            value={formData.storeDetails.storeName}
             onChangeText={(text) =>
-              setFormData({ ...formData, storeName: text })
+              setFormData({
+                ...formData,
+                storeDetails: { ...formData.storeDetails, storeName: text },
+              })
             }
           />
+          {errors.storeName ? (
+            <Text style={styles.errorText}>{errors.storeName}</Text>
+          ) : null}
 
-          {/* Store Logo */}
-          <Text className="text-gray-700 font-rubik mb-2">Store Logo</Text>
-          <View className="flex-row items-center mb-4">
-            <Image
-              source={images.camera}
-              className="w-8 h-8 mr-2"
-              resizeMode="contain"
-            />
-            <Text className="text-gray-700 font-rubik">Upload Logo</Text>
+          <View>
+            {/* Store Logo */}
+            <Text className="text-gray-700 font-rubik mb-2">Store Logo</Text>
+            <View className="flex-row items-center mb-4">
+              <TouchableOpacity
+                onPress={pickImage}
+                className="flex-row items-center"
+              >
+                {formData.storeDetails.storeLogo ? (
+                  <Image
+                    source={{ uri: formData.storeDetails.storeLogo }}
+                    className="w-16 h-16 mr-2 rounded-full"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Image
+                    source={require("@/assets/images/upload.png")}
+                    className="w-8 h-8 mr-2"
+                    resizeMode="contain"
+                  />
+                )}
+                <Text className="text-gray-700 font-rubik">Upload Logo</Text>
+              </TouchableOpacity>
+
+              {/* Cross Button to Remove Image - Now on Right Side */}
+              {formData.storeDetails.storeLogo && (
+                <TouchableOpacity
+                  onPress={() =>
+                    setFormData({
+                      ...formData,
+                      storeDetails: {
+                        ...formData.storeDetails,
+                        storeLogo: null,
+                      },
+                    })
+                  }
+                  className="ml-4 bg-red-500 w-6 h-6 rounded-full flex items-center justify-center"
+                >
+                  <Text className="text-white text-sm font-bold">X</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* Store Description */}
@@ -249,26 +401,38 @@ const SignUp = () => {
             Store Description<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your store description"
-            value={formData.storeDescription}
+            value={formData.storeDetails.description}
             onChangeText={(text) =>
-              setFormData({ ...formData, storeDescription: text })
+              setFormData({
+                ...formData,
+                storeDetails: { ...formData.storeDetails, description: text },
+              })
             }
           />
+          {errors.description ? (
+            <Text style={styles.errorText}>{errors.description}</Text>
+          ) : null}
 
           {/* GST Number */}
           <Text className="text-gray-700 font-rubik mb-2">
             GST Number<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your GST Number"
-            value={formData.gstNumber}
+            value={formData.storeDetails.gstNumber}
             onChangeText={(text) =>
-              setFormData({ ...formData, gstNumber: text })
+              setFormData({
+                ...formData,
+                storeDetails: { ...formData.storeDetails, gstNumber: text },
+              })
             }
           />
+          {errors.gstNumber ? (
+            <Text style={styles.errorText}>{errors.gstNumber}</Text>
+          ) : null}
 
           {/* Business License */}
           <Text className="text-gray-700 font-rubik mb-2">
@@ -277,11 +441,20 @@ const SignUp = () => {
           <TextInput
             className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-6 text-gray-800"
             placeholder="Enter your business license number"
-            value={formData.businessLicense}
+            value={formData.storeDetails.businessLicense}
             onChangeText={(text) =>
-              setFormData({ ...formData, businessLicense: text })
+              setFormData({
+                ...formData,
+                storeDetails: {
+                  ...formData.storeDetails,
+                  businessLicense: text,
+                },
+              })
             }
           />
+          {errors.businessLicense ? (
+            <Text style={styles.errorText}>{errors.businessLicense}</Text>
+          ) : null}
 
           {/* Separator */}
           <View className="border-b border-green-300 mb-6"></View>
@@ -296,11 +469,19 @@ const SignUp = () => {
             Street<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your street"
-            value={formData.street}
-            onChangeText={(text) => setFormData({ ...formData, street: text })}
+            value={formData.storeAddress.street}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                storeAddress: { ...formData.storeAddress, street: text },
+              })
+            }
           />
+          {errors.street ? (
+            <Text style={styles.errorText}>{errors.street}</Text>
+          ) : null}
 
           {/* District Dropdown */}
           <Text className="text-gray-700 font-rubik mb-2">
@@ -311,9 +492,15 @@ const SignUp = () => {
             style={styles.pickerContainer}
           >
             <Picker
-              selectedValue={formData.district}
+              selectedValue={formData.storeAddress.district}
               onValueChange={(itemValue) =>
-                setFormData({ ...formData, district: itemValue })
+                setFormData({
+                  ...formData,
+                  storeAddress: {
+                    ...formData.storeAddress,
+                    district: itemValue,
+                  },
+                })
               }
               style={styles.picker}
               dropdownIconColor="#4A5568" // Customize dropdown icon color
@@ -329,14 +516,22 @@ const SignUp = () => {
               <MaterialIcons name="arrow-drop-down" size={24} color="#4A5568" />
             </View>
           </View>
+          {errors.district ? (
+            <Text style={styles.errorText}>{errors.district}</Text>
+          ) : null}
 
           {/* Taluka */}
           <Text className="text-gray-700 font-rubik mb-2">Taluka</Text>
           <TextInput
             className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
             placeholder="Enter your taluka"
-            value={formData.taluka}
-            onChangeText={(text) => setFormData({ ...formData, taluka: text })}
+            value={formData.storeAddress.taluka}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                storeAddress: { ...formData.storeAddress, taluka: text },
+              })
+            }
           />
 
           {/* Village */}
@@ -344,8 +539,13 @@ const SignUp = () => {
           <TextInput
             className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
             placeholder="Enter your village"
-            value={formData.village}
-            onChangeText={(text) => setFormData({ ...formData, village: text })}
+            value={formData.storeAddress.village}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                storeAddress: { ...formData.storeAddress, village: text },
+              })
+            }
           />
 
           {/* Pincode */}
@@ -353,37 +553,19 @@ const SignUp = () => {
             Pincode<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your pincode"
-            value={formData.pincode}
-            onChangeText={(text) => setFormData({ ...formData, pincode: text })}
-          />
-
-          {/* Latitude */}
-          <Text className="text-gray-700 font-rubik mb-2">
-            Latitude<Text style={styles.requiredStar}>*</Text>
-          </Text>
-          <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
-            placeholder="Enter your latitude"
-            value={formData.latitude}
+            value={formData.storeAddress.pincode}
             onChangeText={(text) =>
-              setFormData({ ...formData, latitude: text })
+              setFormData({
+                ...formData,
+                storeAddress: { ...formData.storeAddress, pincode: text },
+              })
             }
           />
-
-          {/* Longitude */}
-          <Text className="text-gray-700 font-rubik mb-2">
-            Longitude<Text style={styles.requiredStar}>*</Text>
-          </Text>
-          <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-6 text-gray-800"
-            placeholder="Enter your longitude"
-            value={formData.longitude}
-            onChangeText={(text) =>
-              setFormData({ ...formData, longitude: text })
-            }
-          />
+          {errors.pincode ? (
+            <Text style={styles.errorText}>{errors.pincode}</Text>
+          ) : null}
 
           {/* Separator */}
           <View className="border-b border-green-300 mb-6"></View>
@@ -398,52 +580,79 @@ const SignUp = () => {
             Account Holder Name<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your account holder name"
-            value={formData.accountHolderName}
+            value={formData.bankDetails.accountHolderName}
             onChangeText={(text) =>
-              setFormData({ ...formData, accountHolderName: text })
+              setFormData({
+                ...formData,
+                bankDetails: {
+                  ...formData.bankDetails,
+                  accountHolderName: text,
+                },
+              })
             }
           />
+          {errors.accountHolderName ? (
+            <Text style={styles.errorText}>{errors.accountHolderName}</Text>
+          ) : null}
 
           {/* Bank Name */}
           <Text className="text-gray-700 font-rubik mb-2">
             Bank Name<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your bank name"
-            value={formData.bankName}
+            value={formData.bankDetails.bankName}
             onChangeText={(text) =>
-              setFormData({ ...formData, bankName: text })
+              setFormData({
+                ...formData,
+                bankDetails: { ...formData.bankDetails, bankName: text },
+              })
             }
           />
+          {errors.bankName ? (
+            <Text style={styles.errorText}>{errors.bankName}</Text>
+          ) : null}
 
           {/* Account Number */}
           <Text className="text-gray-700 font-rubik mb-2">
             Account Number<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your account number"
-            value={formData.accountNumber}
+            value={formData.bankDetails.accountNumber}
             onChangeText={(text) =>
-              setFormData({ ...formData, accountNumber: text })
+              setFormData({
+                ...formData,
+                bankDetails: { ...formData.bankDetails, accountNumber: text },
+              })
             }
           />
+          {errors.accountNumber ? (
+            <Text style={styles.errorText}>{errors.accountNumber}</Text>
+          ) : null}
 
           {/* IFSC Code */}
           <Text className="text-gray-700 font-rubik mb-2">
             IFSC Code<Text style={styles.requiredStar}>*</Text>
           </Text>
           <TextInput
-            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-4 text-gray-800"
+            className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-800"
             placeholder="Enter your IFSC code"
-            value={formData.ifscCode}
+            value={formData.bankDetails.ifscCode}
             onChangeText={(text) =>
-              setFormData({ ...formData, ifscCode: text })
+              setFormData({
+                ...formData,
+                bankDetails: { ...formData.bankDetails, ifscCode: text },
+              })
             }
           />
+          {errors.ifscCode ? (
+            <Text style={styles.errorText}>{errors.ifscCode}</Text>
+          ) : null}
 
           {/* UPI ID */}
           <Text className="text-gray-700 font-rubik mb-2">
@@ -452,9 +661,17 @@ const SignUp = () => {
           <TextInput
             className="border font-rubik border-gray-300 rounded-lg px-4 py-3 mb-6 text-gray-800"
             placeholder="Enter your UPI ID"
-            value={formData.upiId}
-            onChangeText={(text) => setFormData({ ...formData, upiId: text })}
+            value={formData.bankDetails.upiId}
+            onChangeText={(text) =>
+              setFormData({
+                ...formData,
+                bankDetails: { ...formData.bankDetails, upiId: text },
+              })
+            }
           />
+          {errors.upiId ? (
+            <Text style={styles.errorText}>{errors.upiId}</Text>
+          ) : null}
 
           {/* Save Button */}
           <TouchableOpacity
@@ -495,6 +712,11 @@ const styles = StyleSheet.create({
   },
   requiredStar: {
     color: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 8,
   },
 });
 

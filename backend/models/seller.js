@@ -4,7 +4,7 @@ const SellerSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   mobile: { type: String, required: true, unique: true },
   gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
-  lang: { type: String, default: "en" }, // Language setting
+  lang: { type: String, default: "English" }, // Language setting
 
   storeDetails: {
     storeName: { type: String, required: false }, 
