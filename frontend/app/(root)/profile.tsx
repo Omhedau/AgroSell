@@ -8,8 +8,8 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import useSellerStore from "@/store/useSellerStore"; // Zustand Store Import
-import { useColorScheme } from "react-native"; // Dark Mode Support
+import useSellerStore from "@/store/useSellerStore"; // ✅ Zustand Store Import
+import { useColorScheme } from "react-native"; // ✅ For Dark Mode Support
 
 const Profile = () => {
   const { seller, logout, isDarkMode, toggleDarkMode } = useSellerStore();
@@ -31,6 +31,10 @@ const Profile = () => {
       .join("");
   };
 
+  const maskAccountNumber = (accNumber: string) => {
+    return accNumber ? accNumber.slice(0, 2) + "****" + accNumber.slice(-4) : "N/A";
+  };
+
   return (
     <ScrollView
       className={`flex-1 ${isDark ? "bg-gray-900" : "bg-gray-100"}`}
@@ -38,7 +42,7 @@ const Profile = () => {
       {/* Header Section */}
       <View
         className={`${
-          isDark ? "bg-gray-800" : "bg-indigo-500"
+          isDark ? "bg-gray-800" : "bg-teal-600"
         } pt-10 pb-8 px-6 rounded-b-3xl shadow-lg`}
       >
         <View className="items-center">
@@ -61,7 +65,6 @@ const Profile = () => {
           <Text className="text-2xl font-bold text-white mt-3">
             {seller.name}
           </Text>
-          <Text className="text-sm text-white mt-1">{seller.isActive ? "Active" : "Inactive"}</Text>
         </View>
       </View>
 
@@ -79,19 +82,13 @@ const Profile = () => {
         <View className="flex-row items-center mb-3">
           <Ionicons name="mail-outline" size={20} color="#6B7280" />
           <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-            {seller.email || "No Email Provided"}
+            {seller.email}
           </Text>
         </View>
         <View className="flex-row items-center mb-3">
           <Ionicons name="globe-outline" size={20} color="#6B7280" />
           <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
             {seller.lang || "N/A"}
-          </Text>
-        </View>
-        <View className="flex-row items-center mb-3">
-          <FontAwesome5 name="venus-mars" size={20} color="#6B7280" />
-          <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-            {seller.gender || "N/A"}
           </Text>
         </View>
       </View>
@@ -111,13 +108,13 @@ const Profile = () => {
           <View className="flex-row items-center mb-3">
             <Ionicons name="location-outline" size={24} color="#6B7280" />
             <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-              {seller.storeAddress?.city || "No Address Provided"}
+              {seller.storeAddress?.district || "No Address Provided"}
             </Text>
           </View>
         </View>
       )}
 
-      {/* Bank Details */}
+      {/* Bank Details Section */}
       {seller.bankDetails && (
         <View className="mx-6 mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
           <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
@@ -130,38 +127,46 @@ const Profile = () => {
             </Text>
           </View>
           <View className="flex-row items-center mb-3">
-            <Ionicons name="card-outline" size={20} color="#6B7280" />
+            <FontAwesome5 name="credit-card" size={20} color="#6B7280" />
             <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-              Account No: {seller.bankDetails.accountNumber || "N/A"}
+              {maskAccountNumber(seller.bankDetails.accountNumber)}
+            </Text>
+          </View>
+          <View className="flex-row items-center mb-3">
+            <FontAwesome5 name="code" size={20} color="#6B7280" />
+            <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
+              {seller.bankDetails.ifscCode || "N/A"}
             </Text>
           </View>
         </View>
       )}
 
-      {/* Sales Statistics */}
-      {seller.salesStatistics && (
-        <View className="mx-6 mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-          <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-            Sales Statistics
-          </Text>
-          <View className="flex-row items-center mb-3">
-            <FontAwesome5 name="chart-line" size={20} color="#6B7280" />
-            <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-              Total Sales: {seller.salesStatistics.totalSales || 0}
-            </Text>
-          </View>
-          <View className="flex-row items-center mb-3">
-            <Ionicons name="pricetag-outline" size={20} color="#6B7280" />
-            <Text className="ml-4 text-base text-gray-700 dark:text-gray-300">
-              Revenue: ${seller.salesStatistics.totalRevenue || 0}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {/* Actions */}
+      {/* Settings and Actions */}
       <View className="mx-6 mt-6">
+        <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Actions
+        </Text>
         <View className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 space-y-4">
+          <TouchableOpacity
+            className="flex-row items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
+            onPress={() => Alert.alert("Edit Profile", "Coming Soon!")}
+          >
+            <MaterialIcons name="edit" size={24} color="#4F46E5" />
+            <Text className="ml-4 text-base text-gray-800 dark:text-gray-300">
+              Edit Profile
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            className="flex-row items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
+            onPress={() => Alert.alert("Settings", "Coming Soon!")}
+          >
+            <Ionicons name="settings-outline" size={24} color="#4F46E5" />
+            <Text className="ml-4 text-base text-gray-800 dark:text-gray-300">
+              Settings
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity
             className="flex-row items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
             onPress={() => {
