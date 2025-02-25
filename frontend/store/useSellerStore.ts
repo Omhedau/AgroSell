@@ -20,7 +20,7 @@ interface SellerStore {
   isLoading: boolean;
   isDarkMode: boolean;
   verifyOtp: (mobile: string, otp: string) => Promise<void>;
-  signUp: (sellerDetails: any) => Promise<void>;
+  signUp: (formData: any, filetype: string) => Promise<void>;
   signIn: (mobile: string) => Promise<void>;
   getSeller: () => Promise<void>;
   logout: () => Promise<void>;
@@ -31,11 +31,11 @@ const useSellerStore = create<SellerStore>((set) => ({
   seller: null,
   isLoading: false,
   isDarkMode: false,
-  
+
   verifyOtp: async (mobile: string, otp: string) => {
     try {
       const response = await axios.post(
-        `${constants.base_url}/api/seller/verify`, 
+        `${constants.base_url}/api/seller/verify`,
         { mobile, otp }
       );
 
@@ -62,25 +62,94 @@ const useSellerStore = create<SellerStore>((set) => ({
     }
   },
 
-  signUp: async (sellerDetails: any) => {
+  signUp: async (formData: any, fileType: string): Promise<void> => {
     try {
-      const response = await axios.post(
-        `${constants.base_url}/api/seller`, 
-        sellerDetails
+      console.log("Form data:", formData);
+      let storeLogoUrl: string | null = null;
+
+      if (formData.storeDetails.storeLogo) {
+        try {
+          // Step 1: Generate pre-signed URL from backend
+          const fileName = `store-logos/${Date.now()}.${fileType}`;
+          const uploadResponse = await axios.post(
+            `${constants.base_url}/api/image/upload`,
+            {
+              key: fileName,
+              contentType: `image/${fileType}`,
+            }
+          );
+
+          if (!uploadResponse.data.uploadUrl) {
+            throw new Error("Failed to retrieve pre-signed upload URL");
+          }
+
+          const { uploadUrl } = uploadResponse.data;
+
+          // Step 2: Convert image URI to Blob
+          const response = await fetch(formData.storeDetails.storeLogo);
+          const blob = await response.blob();
+
+          // Step 3: Upload the image to S3 using the pre-signed URL
+          const imageResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: { "Content-Type": `image/${fileType}` },
+            body: blob,
+          });
+
+          if (!imageResponse.ok) {
+            throw new Error(
+              `Failed to upload store logo: ${imageResponse.statusText}`
+            );
+          }
+
+          // Step 4: Extract the final image URL
+          storeLogoUrl = uploadUrl.split("?")[0];
+          console.log("Store logo URL:", storeLogoUrl);
+        } catch (uploadError) {
+          console.error("Error uploading store logo:", uploadError);
+          throw new Error("Store logo upload failed");
+        }
+      }
+
+      // Step 5: Prepare seller data
+      const sellerData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        mobile: formData.mobile,
+        email: formData.email,
+        gender: formData.gender,
+        lang: formData.lang,
+        storeDetails: {
+          ...formData.storeDetails,
+          storeLogo: storeLogoUrl || "default-logo.png", // Use default if upload fails
+        },
+        storeAddress: formData.storeAddress || {},
+        bankDetails: formData.bankDetails || {},
+      };
+
+      console.log("Seller data:", sellerData);
+
+      // Step 6: Send seller data to the backend
+      const createSellerResponse = await axios.post(
+        `${constants.base_url}/api/seller`,
+        sellerData
       );
 
-      if (response.status === 201) {
+      if (createSellerResponse.status === 201) {
         Alert.alert("Success", "You have successfully signed up!");
-        if (response.data.seller && response.data.token) {
-          set({ seller: response.data.seller });
-          await AsyncStorage.setItem("token", response.data.token);
+
+        if (
+          createSellerResponse.data.seller &&
+          createSellerResponse.data.token
+        ) {
+          await AsyncStorage.setItem("token", createSellerResponse.data.token);
         }
-        router.push("/home");
+
+        router.replace("/(root)/(tabs)/home");
       } else {
-        Alert.alert("Error", "Failed to sign up. Please try again.");
+        throw new Error("Failed to sign up as a seller");
       }
     } catch (error) {
-      console.error("Error during sign up:", error);
+      console.error("Error during sign-up:", error);
       Alert.alert("Error", "An error occurred while signing up. Try again.");
     }
   },
@@ -88,7 +157,10 @@ const useSellerStore = create<SellerStore>((set) => ({
   signIn: async (mobile: string) => {
     try {
       console.log("Mobile number:", mobile);
-      const response = await axios.post(`${constants.base_url}/api/seller/otp`, { mobile });
+      const response = await axios.post(
+        `${constants.base_url}/api/seller/otp`,
+        { mobile }
+      );
 
       if (response.status === 200) {
         router.push({
@@ -112,7 +184,7 @@ const useSellerStore = create<SellerStore>((set) => ({
       const token = await AsyncStorage.getItem("token");
       console.log("Token:", token);
       if (token) {
-        const response = await axios.get(`${constants.base_url}/api/seller`, { 
+        const response = await axios.get(`${constants.base_url}/api/seller`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

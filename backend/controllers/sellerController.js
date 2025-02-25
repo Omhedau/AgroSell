@@ -47,16 +47,31 @@ const getSeller = asyncHandler(async (req, res) => {
 
 
 const createSeller = asyncHandler(async (req, res) => {
-  let { name, mobile, gender, lang } = req.body;
+  const {
+    name,
+    mobile,
+    email,
+    gender,
+    lang,
+    storeDetails,
+    storeAddress,
+    bankDetails,
+  } = req.body;
+
+  console.log("i am in createseller", req.body);
 
   // Validate required fields
-  if (!name || !mobile || !gender) {
+  if (
+    !name ||
+    !mobile ||
+    !gender ||
+    !storeDetails ||
+    !storeAddress ||
+    !bankDetails
+  ) {
     res.status(400);
-    throw new Error("Please provide all required fields: name, mobile, and gender.");
+    throw new Error("Please provide all required fields.");
   }
-
-  // Set default language if not provided
-  lang = lang || "en";
 
   // Check if the seller already exists (based on mobile number)
   const existingSeller = await Seller.findOne({ mobile });
@@ -69,19 +84,24 @@ const createSeller = asyncHandler(async (req, res) => {
   const seller = await Seller.create({
     name,
     mobile,
+    email,
     gender,
     lang,
+    storeDetails,
+    storeAddress,
+    bankDetails, 
   });
 
+  console.log("i am in createseller after create", seller);
+
   if (seller) {
-    res.status(201).json({
-      _id: seller._id,
-      name: seller.name,
-      mobile: seller.mobile,
-      gender: seller.gender,
-      lang: seller.lang, // Ensures "en" if not provided
-      createdAt: seller.createdAt,
-    });
+
+    const token = generateToken(seller);
+
+    console.log("i am token in createseller", token);
+
+    res.status(201).json({ seller, token });
+
   } else {
     res.status(400);
     throw new Error("Invalid seller data");

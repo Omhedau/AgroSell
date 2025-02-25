@@ -13,9 +13,11 @@ import images from "@/constants/images";
 import { useLocalSearchParams } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
+import useSellerStore from "@/store/useSellerStore";
 
 const SignUp = () => {
   const { mobile } = useLocalSearchParams();
+  const [filetype, setFileType] = useState("");
   const mobileNumber = Array.isArray(mobile) ? mobile[0] : mobile;
   const [formData, setFormData] = useState({
     firstName: "",
@@ -46,6 +48,10 @@ const SignUp = () => {
       upiId: "",
     },
   });
+
+  const { signUp } = useSellerStore() as {
+    signUp: (formData: any, filetype: string) => Promise<void>;
+  };
 
   const [errors, setErrors] = useState({
     firstName: "",
@@ -105,20 +111,24 @@ const SignUp = () => {
   const pickImage = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        type: "image/*",
+        type: "image/*", // Allow all image types
       });
 
       if (result.assets && result.assets.length > 0) {
-        setFormData({
-          ...formData,
+        const file = result.assets[0];
+        const fileType = file.name.split(".").pop() || ""; // Get file extension or default to empty string
+        setFileType(fileType); // Fixed variable typo
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
           storeDetails: {
-            ...formData.storeDetails,
-            storeLogo: result.assets[0].uri,
+            ...prevFormData.storeDetails,
+            storeLogo: file.uri,
           },
-        });
+        }));
       }
     } catch (error) {
-      console.error("Error picking image: ", error);
+      console.error("Error picking image:", error);
     }
   };
 
@@ -144,7 +154,7 @@ const SignUp = () => {
 
     if (!formData.firstName) newErrors.firstName = "First Name is required";
     if (!formData.lastName) newErrors.lastName = "Last Name is required";
-    if(!formData.mobile) newErrors.mobile = "Mobile is required";
+    if (!formData.mobile) newErrors.mobile = "Mobile is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.storeDetails.storeName)
       newErrors.storeName = "Store Name is required";
@@ -175,15 +185,11 @@ const SignUp = () => {
   };
 
   const handleSubmit = () => {
-    if (validateForm()) {
-      const name = `${formData.firstName} ${formData.lastName}`;
-      const sellerDetails = {
-        name,
-        ...formData,
-      };
-      console.log("Seller Details: ", sellerDetails);
-      // signUp(userDetails); // Uncomment and implement this function as needed
+    if (!validateForm()) {
+      return; // Don't submit if the form is invalid
     }
+
+    signUp(formData, filetype);
   };
 
   return (

@@ -3,6 +3,7 @@ const { generateUploadUrl, generateAccessUrl, deleteImage } = require('../aws-s3
 // Get pre-signed URL for image upload
 const getUploadUrl = async (req, res) => {
   try {
+    console.log('i am in getUploadUrl');
     const { key, contentType } = req.body; // e.g., key = 'uploads/my-image.jpg'
     const url = await generateUploadUrl(key, contentType);
     res.status(200).json({ uploadUrl: url });

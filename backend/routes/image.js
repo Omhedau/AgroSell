@@ -4,7 +4,7 @@ const router = express.Router();
 const {getUploadUrl, getAccessUrl, deleteImageByKey } = require('../controllers/imageController');
 console.log('image.js');
 // router.use(validateToken);
-router.get('/upload', getUploadUrl);
+router.post('/upload', getUploadUrl);
 router.get('/', getAccessUrl);
 router.delete('/', deleteImageByKey);
 
