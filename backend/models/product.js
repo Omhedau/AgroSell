@@ -56,23 +56,6 @@ const ProductSchema = new mongoose.Schema({
     },
   ],
 
-  // ✅ *Search Optimization*
-  tags: [{ type: String, index: true }], // Keywords for easy search (e.g., ["wheat seeds", "organic fertilizer"])
-
-  // ✅ *Customer Ratings & Reviews*
-  ratings: {
-    totalRatings: { type: Number, default: 0 },
-    averageRating: { type: Number, default: 0 },
-    reviews: [
-      {
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        rating: { type: Number, min: 1, max: 5 },
-        reviewText: { type: String },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-  },
-
   // ✅ *Shipping & Logistics*
   shipping: {
     weight: { type: Number, required: false }, // In kg or liters

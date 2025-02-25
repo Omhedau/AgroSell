@@ -10,6 +10,7 @@ interface Seller {
   id: string;
   name: string;
   mobile: string;
+  email : string;
   gender?: string;
   lang?: string;
   isActive?: boolean;
@@ -230,6 +231,7 @@ const useSellerStore = create<SellerStore>((set) => ({
           name: response.data.seller.name,
           mobile: response.data.seller.mobile,
           gender: response.data.seller.gender,
+          email : response.data.seller.email,
           lang: response.data.seller.lang,
           isActive: response.data.seller.isActive,
           createdAt: response.data.seller.createdAt,
