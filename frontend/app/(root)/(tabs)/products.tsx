@@ -31,11 +31,28 @@ const AddProduct = () => {
     productName: "",
     description: "",
     category: categories[0],
+    subCategory: "",
+    brand: "",
     images: [] as string[], // Image URIs stored here
     price: { mrp: "", sellingPrice: "", discountPercentage: "0" },
     stock: { quantity: "", lowStockThreshold: "5" },
-    tags: "",
+    specifications: {
+      weight: "",
+      composition: "",
+      usageInstructions: "",
+      expiryDate: "",
+      cropSuitability: [] as string[],
+      soilType: [] as string[],
+      organic: false,
+    },
+    variants: [] as { variantName: string; options: { name: string; additionalPrice: number }[] }[],
+    shipping: {
+      weight: "",
+      dimensions: { length: "", width: "", height: "" },
+      deliveryTimeInDays: "3",
+    },
     returnPolicy: returnPolicies[0],
+    tags: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -94,6 +111,8 @@ const AddProduct = () => {
       name: formData.productName,
       description: formData.description,
       category: formData.category,
+      subCategory: formData.subCategory,
+      brand: formData.brand,
       images: formData.images, // Pass only the first image
       price: {
         mrp: Number(formData.price.mrp),
@@ -104,7 +123,27 @@ const AddProduct = () => {
         quantity: Number(formData.stock.quantity),
         lowStockThreshold: Number(formData.stock.lowStockThreshold),
       },
+      specifications: {
+        weight: formData.specifications.weight,
+        composition: formData.specifications.composition,
+        usageInstructions: formData.specifications.usageInstructions,
+        expiryDate: formData.specifications.expiryDate,
+        cropSuitability: formData.specifications.cropSuitability,
+        soilType: formData.specifications.soilType,
+        organic: formData.specifications.organic,
+      },
+      variants: formData.variants,
+      shipping: {
+        weight: Number(formData.shipping.weight),
+        dimensions: {
+          length: Number(formData.shipping.dimensions.length),
+          width: Number(formData.shipping.dimensions.width),
+          height: Number(formData.shipping.dimensions.height),
+        },
+        deliveryTimeInDays: Number(formData.shipping.deliveryTimeInDays),
+      },
       returnPolicy: formData.returnPolicy,
+      tags: formData.tags.split(",").map((tag) => tag.trim()), // Convert tags string to array
     };
 
     try {
@@ -120,6 +159,7 @@ const AddProduct = () => {
       <View style={styles.container}>
         <Text style={styles.heading}>Add New Product</Text>
 
+        {/* Product Name */}
         <Text style={styles.label}>Product Name *</Text>
         <TextInput
           style={styles.input}
@@ -129,6 +169,7 @@ const AddProduct = () => {
         />
         {errors.productName && <Text style={styles.errorText}>{errors.productName}</Text>}
 
+        {/* Description */}
         <Text style={styles.label}>Description *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
@@ -140,6 +181,7 @@ const AddProduct = () => {
         />
         {errors.description && <Text style={styles.errorText}>{errors.description}</Text>}
 
+        {/* Category */}
         <Text style={styles.label}>Category *</Text>
         <Picker
           selectedValue={formData.category}
@@ -151,6 +193,25 @@ const AddProduct = () => {
           ))}
         </Picker>
 
+        {/* Subcategory */}
+        <Text style={styles.label}>Subcategory</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter subcategory"
+          value={formData.subCategory}
+          onChangeText={(text) => setFormData({ ...formData, subCategory: text })}
+        />
+
+        {/* Brand */}
+        <Text style={styles.label}>Brand</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter brand"
+          value={formData.brand}
+          onChangeText={(text) => setFormData({ ...formData, brand: text })}
+        />
+
+        {/* Upload Product Image */}
         <Text style={styles.label}>Upload Product Image *</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
           <MaterialIcons name="photo-library" size={24} color="#fff" />
@@ -158,6 +219,7 @@ const AddProduct = () => {
         </TouchableOpacity>
         {errors.images && <Text style={styles.errorText}>{errors.images}</Text>}
 
+        {/* Display Selected Image */}
         {formData.images.length > 0 && (
           <View style={styles.imageContainer}>
             <View style={styles.imageWrapper}>
@@ -169,6 +231,7 @@ const AddProduct = () => {
           </View>
         )}
 
+        {/* MRP */}
         <Text style={styles.label}>MRP (₹) *</Text>
         <TextInput
           style={styles.input}
@@ -179,6 +242,7 @@ const AddProduct = () => {
         />
         {errors.mrp && <Text style={styles.errorText}>{errors.mrp}</Text>}
 
+        {/* Selling Price */}
         <Text style={styles.label}>Selling Price (₹) *</Text>
         <TextInput
           style={styles.input}
@@ -191,6 +255,7 @@ const AddProduct = () => {
         />
         {errors.sellingPrice && <Text style={styles.errorText}>{errors.sellingPrice}</Text>}
 
+        {/* Stock Quantity */}
         <Text style={styles.label}>Stock Quantity *</Text>
         <TextInput
           style={styles.input}
@@ -201,6 +266,149 @@ const AddProduct = () => {
         />
         {errors.stockQuantity && <Text style={styles.errorText}>{errors.stockQuantity}</Text>}
 
+        {/* Specifications */}
+        <Text style={styles.label}>Specifications</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Weight (e.g., 50kg)"
+          value={formData.specifications.weight}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              specifications: { ...formData.specifications, weight: text },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Composition (e.g., NPK 20-20-20)"
+          value={formData.specifications.composition}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              specifications: { ...formData.specifications, composition: text },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Usage Instructions"
+          value={formData.specifications.usageInstructions}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              specifications: { ...formData.specifications, usageInstructions: text },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Expiry Date (YYYY-MM-DD)"
+          value={formData.specifications.expiryDate}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              specifications: { ...formData.specifications, expiryDate: text },
+            })
+          }
+        />
+
+        {/* Variants */}
+        <Text style={styles.label}>Variants</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Variant Name (e.g., Size)"
+          value={formData.variants[0]?.variantName || ""}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              variants: [{ variantName: text, options: [] }],
+            })
+          }
+        />
+
+        {/* Shipping */}
+        <Text style={styles.label}>Shipping</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Weight (kg)"
+          keyboardType="numeric"
+          value={formData.shipping.weight}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              shipping: { ...formData.shipping, weight: text },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Dimensions - Length (cm)"
+          keyboardType="numeric"
+          value={formData.shipping.dimensions.length}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              shipping: {
+                ...formData.shipping,
+                dimensions: { ...formData.shipping.dimensions, length: text },
+              },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Dimensions - Width (cm)"
+          keyboardType="numeric"
+          value={formData.shipping.dimensions.width}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              shipping: {
+                ...formData.shipping,
+                dimensions: { ...formData.shipping.dimensions, width: text },
+              },
+            })
+          }
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Dimensions - Height (cm)"
+          keyboardType="numeric"
+          value={formData.shipping.dimensions.height}
+          onChangeText={(text) =>
+            setFormData({
+              ...formData,
+              shipping: {
+                ...formData.shipping,
+                dimensions: { ...formData.shipping.dimensions, height: text },
+              },
+            })
+          }
+        />
+
+        {/* Return Policy */}
+        <Text style={styles.label}>Return Policy</Text>
+        <Picker
+          selectedValue={formData.returnPolicy}
+          onValueChange={(itemValue) => setFormData({ ...formData, returnPolicy: itemValue })}
+          style={styles.picker}
+        >
+          {returnPolicies.map((policy) => (
+            <Picker.Item key={policy} label={policy} value={policy} />
+          ))}
+        </Picker>
+
+        {/* Tags */}
+        <Text style={styles.label}>Tags (comma-separated)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter tags (e.g., organic, eco-friendly)"
+          value={formData.tags}
+          onChangeText={(text) => setFormData({ ...formData, tags: text })}
+        />
+
+        {/* Submit Button */}
         <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={isLoading}>
           <Text style={styles.buttonText}>
             {isLoading ? "Creating Product..." : "Add Product"}
