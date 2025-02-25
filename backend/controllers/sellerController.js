@@ -30,14 +30,24 @@ const getSellers = asyncHandler(async (req, res) => {
 // @route GET /api/seller/:id
 // @access Public
 const getSeller = asyncHandler(async (req, res) => {
-  const sellerId = req.params.id;
-  const seller = await Seller.findById(sellerId).select("-password");
-  if (seller) {
-    res.status(200).json({ message: "Seller found", seller });
-  } else {
+  console.log("I am in getSeller", req.seller);
+
+  // Extract seller ID from the token (set in validateToken middleware)
+  const sellerId = req.seller.id; 
+
+  // Find the seller by ID
+  const seller = await Seller.findById(sellerId).select("-password"); // Exclude password if applicable
+
+  if (!seller) {
     res.status(404);
     throw new Error("Seller not found");
   }
+
+  console.log("Seller found:", seller);
+
+  res.status(200).json({
+    seller,
+  });
 });
 
 // @desc Create a New Seller

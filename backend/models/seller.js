@@ -3,9 +3,10 @@ const mongoose = require("mongoose");
 const SellerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   mobile: { type: String, required: true, unique: true },
+  email: { type: String, required: false, unique: true },
   gender: { type: String, enum: ["Male", "Female", "Other"], required: true },
   lang: { type: String, default: "English" }, // Language setting
-
+  
   storeDetails: {
     storeName: { type: String, required: false }, 
     storeLogo: { type: String, default: "default-logo.png" },

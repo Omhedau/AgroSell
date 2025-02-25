@@ -13,7 +13,7 @@ const Seller = () => {
   React.useEffect(() => {
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem("sellerToken"); // Use "sellerToken" for differentiation
+        const token = await AsyncStorage.getItem("token"); // Use "sellerToken" for differentiation
         if (token) {
           getSeller(); // Fetch seller details from the store
           setIsSignedIn(true);

@@ -9,9 +9,40 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 interface Seller {
   id: string;
   name: string;
-  email: string;
   mobile: string;
-  [key: string]: any; // Extendable for additional fields
+  gender?: string;
+  lang?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  storeDetails?: {
+    storeName: string;
+    storeLogo: string;
+    description: string;
+    gstNumber: string;
+    businessLicense: string;
+    verificationStatus: string;
+  };
+  storeAddress?: {
+    street: string;
+    district: string;
+    taluka: string;
+    village: string;
+    pincode: string;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
+  bankDetails?: {
+    accountHolderName: string;
+    bankName: string;
+    accountNumber: string;
+    ifscCode: string;
+    upiId?: string;
+  };
+  salesStatistics?: {
+    totalOrders: number;
+    totalRevenue: number;
+    averageRating: number;
+  };
 }
 
 // Define the Zustand store type
@@ -44,8 +75,8 @@ const useSellerStore = create<SellerStore>((set) => ({
 
         if (response.data.seller && response.data.token) {
           set({ seller: response.data.seller });
+          console.log("Seller details:", response.data.token);
           await AsyncStorage.setItem("token", response.data.token);
-
           router.replace("/(root)/(tabs)/home");
         } else {
           router.push({
@@ -69,7 +100,6 @@ const useSellerStore = create<SellerStore>((set) => ({
 
       if (formData.storeDetails.storeLogo) {
         try {
-          // Step 1: Generate pre-signed URL from backend
           const fileName = `store-logos/${Date.now()}.${fileType}`;
           const uploadResponse = await axios.post(
             `${constants.base_url}/api/image/upload`,
@@ -85,11 +115,9 @@ const useSellerStore = create<SellerStore>((set) => ({
 
           const { uploadUrl } = uploadResponse.data;
 
-          // Step 2: Convert image URI to Blob
           const response = await fetch(formData.storeDetails.storeLogo);
           const blob = await response.blob();
 
-          // Step 3: Upload the image to S3 using the pre-signed URL
           const imageResponse = await fetch(uploadUrl, {
             method: "PUT",
             headers: { "Content-Type": `image/${fileType}` },
@@ -102,7 +130,6 @@ const useSellerStore = create<SellerStore>((set) => ({
             );
           }
 
-          // Step 4: Extract the final image URL
           storeLogoUrl = uploadUrl.split("?")[0];
           console.log("Store logo URL:", storeLogoUrl);
         } catch (uploadError) {
@@ -111,7 +138,6 @@ const useSellerStore = create<SellerStore>((set) => ({
         }
       }
 
-      // Step 5: Prepare seller data
       const sellerData = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         mobile: formData.mobile,
@@ -120,7 +146,7 @@ const useSellerStore = create<SellerStore>((set) => ({
         lang: formData.lang,
         storeDetails: {
           ...formData.storeDetails,
-          storeLogo: storeLogoUrl || "default-logo.png", // Use default if upload fails
+          storeLogo: storeLogoUrl || "default-logo.png",
         },
         storeAddress: formData.storeAddress || {},
         bankDetails: formData.bankDetails || {},
@@ -128,7 +154,6 @@ const useSellerStore = create<SellerStore>((set) => ({
 
       console.log("Seller data:", sellerData);
 
-      // Step 6: Send seller data to the backend
       const createSellerResponse = await axios.post(
         `${constants.base_url}/api/seller`,
         sellerData
@@ -143,6 +168,10 @@ const useSellerStore = create<SellerStore>((set) => ({
         ) {
           await AsyncStorage.setItem("token", createSellerResponse.data.token);
         }
+        console.log(
+          "Seller created successfully:",
+          createSellerResponse.data.token
+        );
 
         router.replace("/(root)/(tabs)/home");
       } else {
@@ -168,10 +197,7 @@ const useSellerStore = create<SellerStore>((set) => ({
           params: { mobile },
         });
       } else {
-        Alert.alert(
-          "Error",
-          "Failed to send OTP. Please check your number or try again later."
-        );
+        Alert.alert("Error", "Failed to send OTP. Please try again.");
       }
     } catch (error) {
       console.error("Error during OTP request:", error);
@@ -182,25 +208,54 @@ const useSellerStore = create<SellerStore>((set) => ({
   getSeller: async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      console.log("Token:", token);
-      if (token) {
-        const response = await axios.get(`${constants.base_url}/api/seller`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      console.log("Token found in AsyncStorage:", token);
 
-        if (response.status === 200) {
-          set({ seller: response.data.seller });
-        } else {
-          Alert.alert("Error", "Failed to fetch seller details.");
-          console.error("Failed to fetch seller details");
-        }
-      } else {
-        Alert.alert("Error", "No token found.");
-        console.error("No token found");
+      if (!token) {
+        Alert.alert("Error", "Authentication token is missing. Please sign in again.");
+        console.error("No token found, logging out user.");
+        set({ seller: null });
+        router.replace("/(auth)/sign-in");
+        return;
       }
-    } catch (error) {
-      console.error("Error during fetching seller:", error);
-      Alert.alert("Error", "An error occurred while fetching seller details.");
+
+      const response = await axios.get(`${constants.base_url}/api/seller`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("Seller bobobo details response:", response);
+
+      if (response.status === 200) {
+        const sellerData: Seller = {
+          id: response.data.seller._id,
+          name: response.data.seller.name,
+          mobile: response.data.seller.mobile,
+          gender: response.data.seller.gender,
+          lang: response.data.seller.lang,
+          isActive: response.data.seller.isActive,
+          createdAt: response.data.seller.createdAt,
+          storeDetails: response.data.seller.storeDetails,
+          storeAddress: response.data.seller.storeAddress,
+          bankDetails: response.data.seller.bankDetails,
+          salesStatistics: response.data.seller.salesStatistics,
+        };
+        
+
+        set({ seller: sellerData });
+        console.log("Seller details fetched successfully:", sellerData);
+      } else {
+        Alert.alert("Error", "Failed to retrieve seller details.");
+      }
+    } catch (error: any) {
+      console.error("Error while fetching seller details:", error);
+
+      if (error.response?.status === 401) {
+        Alert.alert("Session Expired", "Please sign in again.");
+        await AsyncStorage.removeItem("token");
+        set({ seller: null });
+        router.replace("/(auth)/sign-in");
+      } else {
+        Alert.alert("Error", "An unexpected error occurred.");
+      }
     }
   },
 
