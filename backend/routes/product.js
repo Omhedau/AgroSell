@@ -6,7 +6,7 @@ const {
   updateProduct,
   deleteProduct,
 } = require("../controllers/productController");
-const validateToken = require("../middleware/validateToken");
+const validateToken  = require("../middleware/validateTokenHandler.js");
 
 const router = express.Router();
 

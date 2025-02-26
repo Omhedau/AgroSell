@@ -16,13 +16,12 @@ app.use(express.json());
 // Enable CORS for all origins
 app.use(cors());
 
-
-
 // Route for handling user-related API requests
 
 app.use("/api/user", require("./routes/user"));
 app.use("/api/seller", require("./routes/seller"));
 app.use("/api/image", require("./routes/image"));
+app.use("/api/products", require("./routes/product"));
 app.use(errorHandler);
 // Start the server and listen on the specified port
 app.listen(port, () => {

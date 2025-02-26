@@ -67,6 +67,16 @@ const ProductSchema = new mongoose.Schema({
     deliveryTimeInDays: { type: Number, default: 3 }, // Estimated delivery time
   },
 
+  // ✅ *Reviews*
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Review",
+    },
+  ],
+
+  tags: [{ type: String }], // e.g., ["Organic", "Pesticide-Free", "High Yield"]
+
   returnPolicy: { type: String, default: "7-day return available" },
   isActive: { type: Boolean, default: true }, // Product visibility
   createdAt: { type: Date, default: Date.now },

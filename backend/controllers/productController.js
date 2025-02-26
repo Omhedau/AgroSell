@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 // ✅ Add a New Product (Only for Authenticated Sellers)
 const addProduct = asyncHandler(async (req, res) => {
   try {
+    console.log(req.body);
     const { name, description, category, subCategory, brand, images, price, stock, specifications, variants, tags, shipping, returnPolicy } = req.body;
 
     const product = new Product({

@@ -43,7 +43,7 @@ const Seller = () => {
 
   if (isSignedIn) {
     console.log("Redirecting seller to dashboard");
-    return <Redirect href="/(root)/(tabs)/home" />;
+    return <Redirect href="/(root)/(tabs)/products" />;
   }
 
   console.log("Redirecting seller to sign-in");
