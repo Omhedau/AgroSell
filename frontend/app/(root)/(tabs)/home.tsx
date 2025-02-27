@@ -6,7 +6,8 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import useUserStore from "@/store/userStore";
+
+import useSellerStore from "@/store/useSellerStore";
 import { useRouter } from "expo-router";
 
 // Define the type for the user object in the store

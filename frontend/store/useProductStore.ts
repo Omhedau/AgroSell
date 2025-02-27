@@ -165,7 +165,7 @@ const useProductStore = create<ProductStore>((set) => ({
         set((state) => ({
           products: [...state.products, { ...productData, id: response.data.product.id }],
         }));
-        router.replace("/(root)/(tabs)/products");
+        router.replace("/(root)/(tabs)/(products)/products");
       } else {
         Alert.alert("Error", "Failed to create product.");
       }

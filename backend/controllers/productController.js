@@ -80,6 +80,27 @@ const getProducts = asyncHandler(async (req, res) => {
   }
 });
 
+
+const getSellerProducts = asyncHandler(async (req, res) => {
+  try {
+    const sellerId = req.seller.id; // Get seller ID from token
+    const products = await Product.find({ sellerId }).select("name description price.sellingPrice images category"); // Fetch only necessary details
+    
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      products,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching seller's products",
+      error: error.message,
+    });
+  }
+});
+
+
 // ✅ Get a Single Product by ID (Only If Belongs to Authenticated Seller)
 const getProductById = asyncHandler(async (req, res) => {
   try {
@@ -166,4 +187,5 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
+  getSellerProducts,
 };

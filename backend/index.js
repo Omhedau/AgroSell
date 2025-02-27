@@ -23,6 +23,7 @@ app.use("/api/seller", require("./routes/seller"));
 app.use("/api/image", require("./routes/image"));
 app.use("/api/products", require("./routes/product"));
 app.use(errorHandler);
+
 // Start the server and listen on the specified port
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);

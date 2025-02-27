@@ -15,7 +15,7 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
   
   const icons: { [key: string]: string } = {
     home: "home",
-    sell: "construct",
+    "(products)": "construct",
     "(ecom)": "cart",
     "(crop)": "leaf",
   };
