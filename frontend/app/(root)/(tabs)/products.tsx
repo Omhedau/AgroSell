@@ -228,7 +228,7 @@ const AddProduct = () => {
 
      // Prepare the product data for submission
      const productData = {
-       sellerId: formData.sellerId,
+       ...formData, // Include other form data
        images: uploadedImageUrl ? [uploadedImageUrl] : [], // Use the uploaded image URL if available
        price: {
          mrp: mrp,
@@ -255,7 +255,6 @@ const AddProduct = () => {
          deliveryTimeInDays: parseInt(formData.shipping.deliveryTimeInDays),
        },
        tags: tagsArray, // Ensure tags is an array
-       ...formData, // Include other form data
      };
 
      console.log("Product data being sent:", productData);
