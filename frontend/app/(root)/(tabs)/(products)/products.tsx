@@ -6,35 +6,49 @@ import axios from 'axios';
 import constants from '@/constants/data';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: { sellingPrice: number };
+  images: string[];
+}
+
 const Products = () => {
   const router = useRouter();
-  const [products, setProducts] = useState([]);
-
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        const response = await axios.get(
-            `${constants.base_url}/api/products`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
+        const response = await axios.get<{ products: Product[] }>(
+          `${constants.base_url}/api/products`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         setProducts(response.data.products);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+      } catch (err) {
+        setError("Failed to fetch products");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProducts();
   }, []);
 
-  const renderProduct = ({ item }: { item: { _id: string; images: string[]; name: string; description: string, price: { sellingPrice: number } } }) => (
-    <View style={styles.card}>
+  const renderProduct = ({ item }: { item: Product }) => (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => router.push({ pathname : '/productdetail', params: { id: item._id } })}
+    >
       <Image source={{ uri: item.images[0] }} style={styles.image} />
       <Text style={styles.productName}>{item.name}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
       <Text style={styles.productPrice}>₹{item.price.sellingPrice}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -47,12 +61,18 @@ const Products = () => {
 
       <Text style={styles.title}>Your Products</Text>
 
-      <FlatList
-        data={products}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={styles.listContainer}
-      />
+      {loading ? (
+        <Text style={styles.loading}>Loading products...</Text>
+      ) : error ? (
+        <Text style={styles.error}>{error}</Text>
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={renderProduct}
+          keyExtractor={(item) => item._id}
+          contentContainerStyle={styles.listContainer}
+        />
+      )}
     </View>
   );
 };
@@ -96,7 +116,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -105,28 +125,40 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     alignItems: 'center',
+    width: '100%',
   },
   image: {
-    width: 100,
-    height: 100,
-    borderRadius: 10,
+    width: 120,
+    height: 120,
+    borderRadius: 15,
     marginBottom: 10,
   },
   productName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#333',
   },
   productPrice: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#ff7e5f',
     fontWeight: 'bold',
     marginTop: 5,
   },
-  description:{
+  description: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center',
     marginBottom: 10,
-  }
+  },
+  loading: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 20,
+  },
+  error: {
+    fontSize: 16,
+    color: 'red',
+    marginTop: 20,
+  },
 });
