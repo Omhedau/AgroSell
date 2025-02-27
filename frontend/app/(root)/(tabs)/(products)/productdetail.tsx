@@ -60,8 +60,11 @@ const ProductDetail = () => {
 
     const handleEdit = () => {
         if (product) {
-            router.push({ pathname: '/editproduct', params: { id: product._id } });
-        } // Navigate to edit product screen
+            router.push({
+                pathname: '/editproduct',
+                params: { product: JSON.stringify(product) }, // Serialize the product object
+            });
+        }
     };
 
     const handleDelete = async () => {
