@@ -141,7 +141,7 @@ const AddProduct = () => {
  const createProduct = async (formData: any, fileType: string) => {
    try {
      // Retrieve the authentication token
-     const token = await AsyncStorage.getItem("token");
+     const token = await AsyncStorage.getItem("Sellertoken");
 
      if (!token) {
        Alert.alert("Error", "Authentication token missing. Please sign in.");

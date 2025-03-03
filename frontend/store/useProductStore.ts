@@ -69,7 +69,7 @@ const useProductStore = create<ProductStore>((set) => ({
   createProduct: async (formData: any, fileType: string) => {
     try {
       set({ isLoading: true });
-      const token = await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("Sellertoken");
 
       if (!token) {
         Alert.alert("Error", "Authentication token missing. Please sign in.");

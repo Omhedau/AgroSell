@@ -77,7 +77,7 @@ const useSellerStore = create<SellerStore>((set) => ({
         if (response.data.seller && response.data.token) {
           set({ seller: response.data.seller });
           console.log("Seller details:", response.data.token);
-          await AsyncStorage.setItem("token", response.data.token);
+          await AsyncStorage.setItem("Sellertoken", response.data.token);
           router.replace("/(root)/(tabs)/home");
         } else {
           router.push({
@@ -167,7 +167,7 @@ const useSellerStore = create<SellerStore>((set) => ({
           createSellerResponse.data.seller &&
           createSellerResponse.data.token
         ) {
-          await AsyncStorage.setItem("token", createSellerResponse.data.token);
+          await AsyncStorage.setItem("Sellertoken", createSellerResponse.data.token);
         }
         console.log(
           "Seller created successfully:",
@@ -208,7 +208,7 @@ const useSellerStore = create<SellerStore>((set) => ({
 
   getSeller: async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("Sellertoken");
       console.log("Token found in AsyncStorage:", token);
 
       if (!token) {
@@ -252,7 +252,7 @@ const useSellerStore = create<SellerStore>((set) => ({
 
       if (error.response?.status === 401) {
         Alert.alert("Session Expired", "Please sign in again.");
-        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("Sellertoken");
         set({ seller: null });
         router.replace("/(auth)/sign-in");
       } else {
@@ -263,7 +263,7 @@ const useSellerStore = create<SellerStore>((set) => ({
 
   logout: async () => {
     try {
-      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("Sellertoken");
       set({ seller: null });
       router.replace("/(auth)/sign-in");
     } catch (error) {

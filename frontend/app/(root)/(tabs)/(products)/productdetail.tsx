@@ -55,7 +55,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await AsyncStorage.getItem("Sellertoken");
         const response = await axios.get<{ product: Product }>(
           `${constants.base_url}/api/products/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -91,7 +91,7 @@ const ProductDetail = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem("token");
+              const token = await AsyncStorage.getItem("Sellertoken");
               await axios.delete(`${constants.base_url}/api/products/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
               });

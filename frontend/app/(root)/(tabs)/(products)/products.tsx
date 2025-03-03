@@ -23,7 +23,7 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
+        const token = await AsyncStorage.getItem("Sellertoken");
         const response = await axios.get<{ products: Product[] }>(
           `${constants.base_url}/api/products`,
           { headers: { Authorization: `Bearer ${token}` } }
